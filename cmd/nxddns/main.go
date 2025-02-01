@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -14,11 +15,13 @@ import (
 	handlers "github.com/niko0xdev/nx-ddns/internal/app/handler"
 	"github.com/niko0xdev/nx-ddns/internal/config"
 	"github.com/niko0xdev/nx-ddns/internal/database"
+	"github.com/niko0xdev/nx-ddns/internal/repository"
 	"github.com/niko0xdev/nx-ddns/internal/utils"
+	"github.com/niko0xdev/nx-ddns/pkg/ddns"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	_ "github.com/niko0xdev/nx-ddns/cmd/api/docs"
+	_ "github.com/niko0xdev/nx-ddns/cmd/nxddns/docs"
 )
 
 // @BasePath /api
@@ -68,6 +71,9 @@ func main() {
 		api.GET("/logs/:dnsRecordId", dnsHandler.GetDNSLogs)
 	}
 
+	// Start background task to check IP changes
+	go startIPChangeChecker(cfg)
+
 	// Get port from environment variable or default to 8080
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -107,4 +113,40 @@ func main() {
 	}
 
 	log.Println("Server gracefully stopped")
+}
+
+// startIPChangeChecker runs the check_ip_changes function every minute
+func startIPChangeChecker(cfg *config.Config) {
+	ticker := time.NewTicker(ddns.IpCheckInterval)
+	defer ticker.Stop()
+
+	// init db repository
+	repo := repository.NewDNSRecordRepository(database.DB)
+
+	for range ticker.C {
+		fmt.Println("Checking for IP changes...")
+		// get active dns records
+		records, err := repo.GetDNSRecords()
+		if err != nil {
+			panic(err)
+		}
+
+		// get current public ip
+		ip, err := utils.GetPublicIP()
+		if err != nil {
+			panic(err)
+		}
+
+		// update dns records
+		for _, record := range records {
+
+			if record.IPAddress != ip {
+				// update dns record
+				_, err := ddns.UpdateDNSRecord(repo, &record, ip, cfg)
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+		}
+	}
 }

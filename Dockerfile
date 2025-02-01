@@ -14,13 +14,13 @@ WORKDIR /app
 COPY go.mod go.sum ./
 
 # Download the dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
-RUN go mod download
+RUN go mod tidy
 
 # Copy the source code into the container
 COPY . .
 
 # Build the Go app for multiple architectures
-RUN go build -o nxddns ./cmd/nxddns
+RUN go build -o nxddns ./cmd/nxddns/main.go
 
 # Stage 2: Build the final image
 FROM alpine:3.20

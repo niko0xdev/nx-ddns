@@ -1,4 +1,4 @@
-.PHONY: build run dev docker-build docker-run test clean
+.PHONY: build run dev docker-build docker-run test clean docs cli
 
 build:
 	go build -o nxddns ./cmd/nxddns
@@ -23,13 +23,8 @@ test:
 clean:
 	rm -f nxddns
 
-.PHONY: api, docs, nxddns
-
-api:
-	go run ./cmd/api/main.go
-
 docs:
-	swag init --output ./cmd/api/docs --dir ./cmd/api,./internal
+	swag init --output ./cmd/nxddns/docs --dir ./cmd/nxddns,./internal
 
-nxddns:
-	go run ./cmd/nxddns/main.go
+cli:
+	go run ./cmd/cli/main.go

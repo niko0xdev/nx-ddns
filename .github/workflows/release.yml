@@ -1,0 +1,46 @@
+name: Build and Push Docker Image
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Step 3: Cache Docker layers (to speed up builds)
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      # Step 4: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Step 5: Build and Push the Docker Image
+      - name: Build and Push Docker Image
+        run: |
+          # Get the release tag from GitHub release event
+          RELEASE_TAG=${{ github.event.release.tag_name }}
+
+          # Build and push the Docker image
+          docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 \
+            -t niko0xdev/nxddns:latest \
+            -t niko0xdev/nxddns:${RELEASE_TAG} \
+            --push .

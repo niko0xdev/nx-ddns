@@ -1,5 +1,5 @@
-# Stage 1: Build the application
-FROM golang:1.20-alpine as builder
+# Stage 1: Build the Go application
+FROM --platform=linux/amd64,linux/arm64,linux/arm/v7 golang:1.20-alpine as builder
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
@@ -13,22 +13,26 @@ RUN go mod tidy
 # Copy the source code into the container
 COPY . .
 
-# Build the Go app
-RUN GOOS=linux GOARCH=amd64 go build -o nxddns ./cmd/nxddns
+# Build the Go app for multiple architectures
+RUN GOOS=linux GOARCH=amd64 go build -o nxddns-amd64 ./cmd/nxddns
+RUN GOOS=linux GOARCH=arm64 go build -o nxddns-arm64 ./cmd/nxddns
+RUN GOOS=linux GOARCH=armv7 go build -o nxddns-armv7 ./cmd/nxddns
 
 # Stage 2: Build the final image
-FROM alpine:latest
+FROM --platform=linux/amd64,linux/arm64,linux/arm/v7 alpine:latest
 
 WORKDIR /root/
 
-# Install dependencies (if any)
+# Install necessary certificates (like CA certificates) for all platforms
 RUN apk add --no-cache ca-certificates
 
-# Copy the Pre-built binary from the builder stage
-COPY --from=builder /app/nxddns .
+# Copy the pre-built binaries from the builder stage
+COPY --from=builder /app/nxddns-amd64 ./nxddns-amd64
+COPY --from=builder /app/nxddns-arm64 ./nxddns-arm64
+COPY --from=builder /app/nxddns-armv7 ./nxddns-armv7
 
-# Expose port (optional, depending on your app's network configuration)
+# Expose ports if needed (change port if required)
 EXPOSE 8080
 
-# Command to run the executable
-CMD ["./nxddns"]
+# Default command to run based on architecture
+CMD ["sh", "-c", "if [ $(uname -m) = 'x86_64' ]; then ./nxddns-amd64; elif [ $(uname -m) = 'aarch64' ]; then ./nxddns-arm64; else ./nxddns-armv7; fi"]

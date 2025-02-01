@@ -16,6 +16,10 @@ func main() {
 
 	cfg := config.LoadConfig()
 
+	// Initialize Snowflake ID generator
+	// TODO: add node id here
+	utils.InitSnowflake(1)
+
 	database.InitDBConnection(cfg)
 
 	err := database.Ping()
@@ -40,6 +44,7 @@ func main() {
 
 	// update dns records
 	for _, record := range records {
+
 		if record.IPAddress != ip {
 			// update dns record
 			_, err := ddns.UpdateDNSRecord(repo, &record, ip, cfg)

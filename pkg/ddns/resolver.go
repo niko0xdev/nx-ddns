@@ -45,5 +45,7 @@ func UpdateDNSRecord(repo *repository.DNSRecordRepository, record *database.DNSR
 		return nil, fmt.Errorf("failed to update DNS record in repository: %w", err)
 	}
 
+	fmt.Printf(" -> Updated DNS record for %s to %s\n", record.RecordName, record.IPAddress)
+
 	return record, nil
 }

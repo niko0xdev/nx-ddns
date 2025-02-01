@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/dns_logs/{dnsRecordId}": {
+        "/logs/{dnsRecordId}": {
             "get": {
                 "description": "Retrieve all logs related to a specific DNS record",
                 "produces": [
@@ -53,7 +53,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/dns_records": {
+        "/records": {
             "get": {
                 "description": "Retrieve a list of all DNS records",
                 "produces": [
@@ -126,7 +126,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/dns_records/{id}": {
+        "/records/{id}": {
             "get": {
                 "description": "Retrieve a specific DNS record by ID",
                 "produces": [

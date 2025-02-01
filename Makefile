@@ -23,10 +23,13 @@ test:
 clean:
 	rm -f nxddns
 
-.PHONY: api, docs
+.PHONY: api, docs, nxddns
 
 api:
 	go run ./cmd/api/main.go
 
 docs:
 	swag init --output ./cmd/api/docs --dir ./cmd/api,./internal
+
+nxddns:
+	go run ./cmd/nxddns/main.go

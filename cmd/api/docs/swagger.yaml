@@ -59,7 +59,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /dns_logs/{dnsRecordId}:
+  /logs/{dnsRecordId}:
     get:
       description: Retrieve all logs related to a specific DNS record
       parameters:
@@ -84,7 +84,7 @@ paths:
       summary: Get DNS logs for a record
       tags:
       - DNSLogs
-  /dns_records:
+  /records:
     get:
       description: Retrieve a list of all DNS records
       produces:
@@ -132,7 +132,7 @@ paths:
       summary: Create a new DNS record
       tags:
       - DNSRecords
-  /dns_records/{id}:
+  /records/{id}:
     delete:
       description: Delete a DNS record by ID
       parameters:

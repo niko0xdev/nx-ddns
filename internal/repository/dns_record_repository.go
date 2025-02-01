@@ -67,6 +67,9 @@ func (repo *DNSRecordRepository) UpdateDNSRecord(id string, dnsRecord *database.
 		NewValue:    dnsRecord.IPAddress,
 	}
 
+	// update record
+	record.IPAddress = dnsRecord.IPAddress
+
 	if err := repo.DB.Save(record).Error; err != nil {
 		return nil, fmt.Errorf("error updating DNS record: %w", err)
 	}

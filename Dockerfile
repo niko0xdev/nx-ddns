@@ -1,5 +1,5 @@
 # Stage 1: Build the Go application
-FROM --platform=linux/amd64,linux/arm64,linux/arm/v7 golang:1.20-alpine as builder
+FROM golang:1.20-alpine as builder
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
@@ -19,7 +19,7 @@ RUN GOOS=linux GOARCH=arm64 go build -o nxddns-arm64 ./cmd/nxddns
 RUN GOOS=linux GOARCH=armv7 go build -o nxddns-armv7 ./cmd/nxddns
 
 # Stage 2: Build the final image
-FROM --platform=linux/amd64,linux/arm64,linux/arm/v7 alpine:latest
+FROM alpine:latest
 
 WORKDIR /root/
 

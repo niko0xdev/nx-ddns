@@ -1,8 +1,6 @@
 module github.com/niko0xdev/nx-ddns
 
-go 1.21.0
-
-toolchain go1.21.6
+go 1.23
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0

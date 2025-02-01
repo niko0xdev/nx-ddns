@@ -1,5 +1,11 @@
 # Stage 1: Build the Go application
-FROM golang:1.20-alpine AS builder
+FROM golang:1.23.1-alpine3.20 as builder
+
+LABEL maintainer="niko0xdev <niko0xdev@gmail.com>"
+
+ARG OS
+
+ARG ARCH
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
@@ -14,25 +20,36 @@ RUN go mod download
 COPY . .
 
 # Build the Go app for multiple architectures
-RUN GOOS=linux GOARCH=amd64 go build -o nxddns-amd64 ./cmd/nxddns
-RUN GOOS=linux GOARCH=arm64 go build -o nxddns-arm64 ./cmd/nxddns
-RUN GOOS=linux GOARCH=armv7 go build -o nxddns-armv7 ./cmd/nxddns
+RUN go build -o nxddns ./cmd/nxddns
 
 # Stage 2: Build the final image
-FROM alpine:latest
+FROM alpine:3.20
 
-WORKDIR /root/
+ARG VERSION
+ARG user=nxddns
+ARG group=nxddns
+ARG uid=1000
+ARG gid=1000
+
+ARG API_PORT=8080
+
+USER root
 
 # Install necessary certificates (like CA certificates) for all platforms
 RUN apk add --no-cache ca-certificates
 
+WORKDIR /app
+
 # Copy the pre-built binaries from the builder stage
-COPY --from=builder /app/nxddns-amd64 ./nxddns-amd64
-COPY --from=builder /app/nxddns-arm64 ./nxddns-arm64
-COPY --from=builder /app/nxddns-armv7 ./nxddns-armv7
+COPY --from=builder /app/nxddns ./nxddns
+
+RUN apk update && apk --no-cache add bash && addgroup -g ${gid} ${group} && adduser -h /app -u ${uid} -G ${group} -s /bin/bash -D ${user}
+RUN chown ${user}:${group} /app/nxddns && chmod +x /app/nxddns
+
+USER ${user}
 
 # Expose ports if needed (change port if required)
-EXPOSE 8080
+EXPOSE ${API_PORT}
 
-# Default command to run based on architecture
-CMD ["sh", "-c", "if [ $(uname -m) = 'x86_64' ]; then ./nxddns-amd64; elif [ $(uname -m) = 'aarch64' ]; then ./nxddns-arm64; else ./nxddns-armv7; fi"]
+# Default command to run
+CMD ["./nxddns"]

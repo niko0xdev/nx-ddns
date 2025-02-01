@@ -1,0 +1,224 @@
+basePath: /api
+definitions:
+  database.DNSProvider:
+    enum:
+    - NameCheap
+    - GoDaddy
+    - Google
+    type: string
+    x-enum-varnames:
+    - NameCheap
+    - GoDaddy
+    - Google
+  dto.DNSLog:
+    properties:
+      id:
+        type: string
+      newValue:
+        type: string
+      oldValue:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  dto.DNSRecord:
+    properties:
+      dnsProvider:
+        type: string
+      domain:
+        type: string
+      id:
+        type: string
+      ipAddress:
+        type: string
+      lastUpdated:
+        type: string
+      recordName:
+        type: string
+      recordType:
+        type: string
+    type: object
+  dto.DNSRecordRequest:
+    properties:
+      dnsProvider:
+        $ref: '#/definitions/database.DNSProvider'
+      domain:
+        type: string
+      ipAddress:
+        type: string
+      recordName:
+        type: string
+      recordType:
+        type: string
+    type: object
+  dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /dns_logs/{dnsRecordId}:
+    get:
+      description: Retrieve all logs related to a specific DNS record
+      parameters:
+      - description: DNS Record ID
+        in: path
+        name: dnsRecordId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.DNSLog'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get DNS logs for a record
+      tags:
+      - DNSLogs
+  /dns_records:
+    get:
+      description: Retrieve a list of all DNS records
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.DNSRecord'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all DNS records
+      tags:
+      - DNSRecords
+    post:
+      consumes:
+      - application/json
+      description: Creates a new DNS record and logs the creation
+      parameters:
+      - description: DNS Record
+        in: body
+        name: dnsRecord
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DNSRecordRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.DNSRecord'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new DNS record
+      tags:
+      - DNSRecords
+  /dns_records/{id}:
+    delete:
+      description: Delete a DNS record by ID
+      parameters:
+      - description: DNS Record ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: DNS record not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a DNS record
+      tags:
+      - DNSRecords
+    get:
+      description: Retrieve a specific DNS record by ID
+      parameters:
+      - description: DNS Record ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DNSRecord'
+        "404":
+          description: DNS record not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a DNS record by ID
+      tags:
+      - DNSRecords
+    put:
+      consumes:
+      - application/json
+      description: Update the details of an existing DNS record
+      parameters:
+      - description: DNS Record ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: DNS Record Update
+        in: body
+        name: dnsRecord
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DNSRecordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DNSRecord'
+        "400":
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: DNS record not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a DNS record
+      tags:
+      - DNSRecords
+swagger: "2.0"

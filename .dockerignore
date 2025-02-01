@@ -1,0 +1,25 @@
+# Exclude typical editor and OS files
+.vscode
+.idea
+.DS_Store
+
+# Exclude build artifacts
+/bin
+/obj
+/out
+/vendor
+
+# Exclude development-specific files
+.git
+.gitignore
+.dockerignore
+Dockerfile.dev
+docker-compose.yml
+
+# Exclude test files
+*_test.go
+
+# Exclude configuration files
+config.toml
+node_modules
+.next
